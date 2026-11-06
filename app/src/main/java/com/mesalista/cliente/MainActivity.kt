@@ -12,8 +12,8 @@ import com.mesalista.cliente.ui.tema.TemaMesaLista
 
 /**
  * La única actividad: todas las pantallas son de Compose (ui/). Recibe
- * también los enlaces mesalista://reserva/… (vuelta de PayPal) y, en la
- * fase 4, los avisos push que se tocan.
+ * también los enlaces mesalista://reserva/… (vuelta de PayPal) y los avisos
+ * push que se tocan (ver datos/Enlaces.kt).
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

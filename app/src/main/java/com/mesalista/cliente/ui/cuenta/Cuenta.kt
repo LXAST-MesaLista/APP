@@ -19,7 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mesalista.cliente.App
 import com.mesalista.cliente.datos.Acciones
 import com.mesalista.cliente.datos.ApiError
+import com.mesalista.cliente.datos.Avisos
 import com.mesalista.cliente.datos.Usuario
 import com.mesalista.cliente.ui.comun.Aviso
 import com.mesalista.cliente.ui.comun.BotonPrincipal
@@ -92,6 +96,24 @@ class CuentaVM : ViewModel() {
     }
 }
 
+/** Estado de los avisos push en este móvil; se vuelve a mirar al volver de los ajustes. */
+@Composable
+private fun AvisosDelMovil() {
+    val contexto = LocalContext.current
+    var permitidos by remember { mutableStateOf(Avisos.permitidos(contexto)) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { permitidos = Avisos.permitidos(contexto) }
+    Seccion("Avisos en este móvil")
+    if (permitidos) {
+        Aviso("Activados: te avisaremos cuando una reserva se confirme, cambie o se cancele.", tipo = "ok")
+    } else {
+        Text(
+            "Los avisos están desactivados. Actívalos para saber al momento si el restaurante cancela o cambia una reserva.",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        BotonSecundario("Activar avisos") { Avisos.abrirAjustes(contexto) }
+    }
+}
+
 @Composable
 fun CuentaPantalla(vm: CuentaVM = viewModel()) {
     val usuario by App.sesion.usuario.collectAsState()
@@ -105,6 +127,8 @@ fun CuentaPantalla(vm: CuentaVM = viewModel()) {
             ultimo = true, alTerminar = vm::guardar)
         BotonPrincipal("Guardar", vm.guardando, activo = vm.nombre.isNotBlank() && vm.telefono.isNotBlank(), alPulsar = vm::guardar)
         BotonSecundario("Cerrar sesión") { alcance.launch { Acciones.salir() } }
+
+        if (Avisos.activo) AvisosDelMovil()
 
         Seccion("Eliminar cuenta")
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f))) {

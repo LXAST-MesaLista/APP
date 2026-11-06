@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono pequeño de los avisos (barra de estado): la mesa del icono de la app, en un solo color. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <group
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="1.15"
+        android:scaleY="1.15"
+        android:translateY="12">
+        <path
+            android:pathData="M136,200 L376,200 M160,200 L160,372 M352,200 L352,372 M256,116 L256,200"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="40" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M224,104 a32,32 0 1,0 64,0 a32,32 0 1,0 -64,0 Z" />
+    </group>
+</vector>

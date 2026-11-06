@@ -100,5 +100,11 @@ dependencies {
     // Pago de la señal en una pestaña del navegador (Custom Tabs).
     implementation("androidx.browser:browser:1.8.0")
 
+    // Avisos push con Firebase Cloud Messaging. Se incluye siempre; sin
+    // google-services.json la app no lo usa (BuildConfig.CON_FIREBASE).
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+
     testImplementation("junit:junit:4.13.2")
 }
