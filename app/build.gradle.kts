@@ -97,5 +97,8 @@ dependencies {
     // Dibujar el QR de la reserva (solo genera, no usa la cámara).
     implementation("com.google.zxing:core:3.5.3")
 
+    // Pago de la señal en una pestaña del navegador (Custom Tabs).
+    implementation("androidx.browser:browser:1.8.0")
+
     testImplementation("junit:junit:4.13.2")
 }

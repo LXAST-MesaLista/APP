@@ -33,6 +33,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.mesalista.cliente.App
+import com.mesalista.cliente.datos.Enlaces
 import com.mesalista.cliente.ui.acceso.BienvenidaPantalla
 import com.mesalista.cliente.ui.acceso.EntrarPantalla
 import com.mesalista.cliente.ui.acceso.RecuperarPantalla
@@ -42,6 +43,8 @@ import com.mesalista.cliente.ui.cuenta.CuentaPantalla
 import com.mesalista.cliente.ui.inicio.InicioPantalla
 import com.mesalista.cliente.ui.reservas.ConfirmarPantalla
 import com.mesalista.cliente.ui.reservas.DetallePantalla
+import com.mesalista.cliente.ui.reservas.GrupoPantalla
+import com.mesalista.cliente.ui.reservas.VincularPantalla
 import com.mesalista.cliente.ui.reservas.ModificarPantalla
 import com.mesalista.cliente.ui.reservas.MisReservasPantalla
 import com.mesalista.cliente.ui.reservas.ReservarPantalla
@@ -109,6 +112,8 @@ private fun titulo(ruta: String?) = when {
     ruta.startsWith("confirmar") -> "Confirmar reserva"
     ruta.startsWith("reserva/") -> "Reserva"
     ruta.startsWith("modificar") -> "Modificar reserva"
+    ruta == "grupos" -> "Grupo grande"
+    ruta == "vincular" -> "Reserva del local"
     else -> Seccion.entries.firstOrNull { it.ruta == ruta }?.texto ?: "MesaLista"
 }
 
@@ -131,6 +136,15 @@ private fun PrincipalNav() {
     LaunchedEffect(Unit) {
         Mensajes.flujo.collect { avisos.showSnackbar(it) }
     }
+    // Enlaces que abren una reserva: vuelta de PayPal y (fase 4) avisos push tocados.
+    val destino by Enlaces.pendiente.collectAsState()
+    LaunchedEffect(destino) {
+        val d = destino ?: return@LaunchedEffect
+        Enlaces.pendiente.value = null
+        d.pago?.let { Mensajes.mostrar(Enlaces.textoPago(it)) }
+        if (d.reservaId != null) nav.navigate("reserva/${d.reservaId}") { launchSingleTop = true }
+        else if (d.pago != null) nav.irASeccion("reservas")
+    }
     val principal = Seccion.entries.any { it.ruta == ruta }
     Scaffold(
         topBar = {
@@ -150,13 +164,14 @@ private fun PrincipalNav() {
                 val seccionActual = when {
                     ruta == null -> null
                     ruta.startsWith("confirmar") -> Seccion.Reservar
-                    ruta.startsWith("reserva/") || ruta.startsWith("modificar") -> Seccion.Reservas
+                    ruta.startsWith("reserva/") || ruta.startsWith("modificar") || ruta == "grupos" || ruta == "vincular" -> Seccion.Reservas
                     else -> Seccion.entries.firstOrNull { it.ruta == ruta }
                 }
                 Seccion.entries.forEach { s ->
                     NavigationBarItem(
                         selected = s == seccionActual,
-                        onClick = { nav.irASeccion(s.ruta) },
+                        // En la sección actual, vuelve a su primera pantalla (p. ej. de una reserva a la lista).
+                        onClick = { if (s != seccionActual || !nav.popBackStack(s.ruta, inclusive = false)) nav.irASeccion(s.ruta) },
                         icon = { Icon(s.icono, contentDescription = null) },
                         label = { Text(s.texto) },
                     )
@@ -170,10 +185,20 @@ private fun PrincipalNav() {
                 InicioPantalla(
                     irAReserva = { nav.navigate("reserva/$it") },
                     irAReservar = { nav.irASeccion("reservar") },
+                    irAVincular = { nav.navigate("vincular") },
                 )
             }
             composable("reservar") {
-                ReservarPantalla(irAConfirmar = { fecha, personas, hora -> nav.navigate("confirmar/$fecha/$personas/${android.net.Uri.encode(hora)}") })
+                ReservarPantalla(
+                    irAConfirmar = { fecha, personas, hora -> nav.navigate("confirmar/$fecha/$personas/${android.net.Uri.encode(hora)}") },
+                    irAGrupos = { nav.navigate("grupos") },
+                )
+            }
+            composable("grupos") {
+                GrupoPantalla(alEnviar = { nav.irASeccion("reservas") })
+            }
+            composable("vincular") {
+                VincularPantalla(alVincular = { id -> nav.navigate("reserva/$id") { popUpTo("vincular") { inclusive = true } } })
             }
             composable(
                 "confirmar/{fecha}/{personas}/{hora}",
@@ -189,7 +214,11 @@ private fun PrincipalNav() {
                 )
             }
             composable("reservas") {
-                MisReservasPantalla(irAReserva = { nav.navigate("reserva/$it") })
+                MisReservasPantalla(
+                    irAReserva = { nav.navigate("reserva/$it") },
+                    irAGrupos = { nav.navigate("grupos") },
+                    irAVincular = { nav.navigate("vincular") },
+                )
             }
             composable("reserva/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) {
                 DetallePantalla(irAModificar = { nav.navigate("modificar/$it") })
