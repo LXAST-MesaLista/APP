@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Color de la marca, el mismo que la web. Fondo del icono y de la pantalla de inicio. -->
+    <color name="bar">#A8432A</color>
+    <color name="fondo">#FBF9F7</color>
+</resources>
