@@ -3,6 +3,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Para abrir PayPal en una pestaña del navegador (Custom Tabs). -->
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
     <!-- Sin copias de seguridad en la nube: el token de la sesión no sale del móvil. -->
     <application
         android:name=".MesaListaApp"
@@ -24,6 +31,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Vuelta de PayPal: el servidor redirige a mesalista://reserva/{id}?pago=… (RF-44). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mesalista" android:host="reserva" />
             </intent-filter>
         </activity>
     </application>

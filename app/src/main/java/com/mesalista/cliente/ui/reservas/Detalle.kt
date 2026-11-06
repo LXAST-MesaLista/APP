@@ -1,6 +1,8 @@
 package com.mesalista.cliente.ui.reservas
 
 import android.app.Activity
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,6 +59,7 @@ import com.mesalista.cliente.ui.comun.EstadoChip
 import com.mesalista.cliente.ui.comun.Mensajes
 import com.mesalista.cliente.ui.comun.Pagina
 import com.mesalista.cliente.ui.comun.Titulo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Detalle de una reserva con su QR (RF-18) y las acciones que permite. */
@@ -79,6 +83,30 @@ class DetalleVM(estado: SavedStateHandle) : ViewModel() {
                 reserva = Reserva.de(App.api.get("/reservations/$id").getJSONObject("reservation"))
             } catch (e: ApiError) {
                 error = e.texto
+            }
+        }
+    }
+
+    var pagando by mutableStateOf(false)
+        private set
+
+    /**
+     * Pagar la señal (RF-44): el servidor crea el pedido en PayPal y devuelve
+     * su página, que se abre en una pestaña del navegador (se ve que es PayPal
+     * de verdad). Al terminar, el servidor redirige a mesalista://reserva/{id}?pago=….
+     */
+    fun pagar(abrir: (String) -> Unit) {
+        viewModelScope.launch {
+            pagando = true
+            error = null
+            try {
+                val url = App.api.post("/reservations/$id/pay", org.json.JSONObject().put("from", "app")).getString("approve_url")
+                if (url.startsWith("https://") || (com.mesalista.cliente.BuildConfig.DEBUG && url.startsWith("http://"))) abrir(url)
+                else error = "La dirección de pago no es segura."
+            } catch (e: ApiError) {
+                error = e.texto
+            } finally {
+                pagando = false
             }
         }
     }
@@ -112,7 +140,10 @@ fun DetallePantalla(irAModificar: (Int) -> Unit, vm: DetalleVM = viewModel()) {
         Titulo(Formato.fechaLargaMayuscula(r.fecha))
         EstadoChip(r.estado)
 
-        BloqueSenal(r)
+        val contexto = LocalContext.current
+        BloqueSenal(r, vm.pagando, alAcabarPlazo = vm::cargar) {
+            vm.pagar { url -> CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(contexto, Uri.parse(url)) }
+        }
 
         r.qr?.let { qr ->
             Card(
@@ -172,12 +203,39 @@ fun DetallePantalla(irAModificar: (Int) -> Unit, vm: DetalleVM = viewModel()) {
     }
 }
 
-/** Estado de la señal de un grupo (el pago con PayPal llega en la fase siguiente). */
+/**
+ * Señal de un grupo (RF-44): pendiente, con cuenta atrás y botón de PayPal;
+ * o el estado de la ya pagada.
+ */
 @Composable
-private fun BloqueSenal(r: Reserva) {
+private fun BloqueSenal(r: Reserva, pagando: Boolean, alAcabarPlazo: () -> Unit, alPagar: () -> Unit) {
     val s = r.senal ?: return
     when {
-        r.estado == "pending_payment" && r.pagable -> Aviso("Falta pagar la señal de ${s.importe} para confirmar la reserva.", "aviso")
+        r.estado == "pending_payment" && r.pagable -> {
+            var quedan by remember(r) { mutableLongStateOf(s.segundosRestantes ?: 0L) }
+            LaunchedEffect(r) {
+                while (quedan > 0) {
+                    delay(1000)
+                    quedan--
+                }
+                alAcabarPlazo()
+            }
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Paga la señal para confirmar", style = MaterialTheme.typography.titleMedium)
+                    Text(s.importe, style = MaterialTheme.typography.displaySmall)
+                    Text(
+                        "Tiempo para pagar: ${quedan / 60}:${(quedan % 60).toString().padStart(2, '0')}" +
+                            (s.vence?.let { " (hasta las ${it.takeLast(5)})" } ?: "") + ". Si no, las mesas se liberan.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    BotonPrincipal("Pagar con PayPal", pagando, alPulsar = alPagar)
+                    Text("La señal se devuelve si cancelas dentro del plazo o si cancela el restaurante.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
         r.estado == "pending_payment" -> Aviso("El plazo para pagar la señal ha terminado. La reserva se liberará en unos segundos.", "aviso")
         s.pago == "captured" -> Aviso("Señal pagada: ${s.importe}.", "ok")
         s.pago == "refund_pending" -> Aviso("Señal de ${s.importe}: devolución en curso.", "ok")

@@ -29,6 +29,7 @@ import com.mesalista.cliente.datos.Reserva
 import com.mesalista.cliente.datos.Usuario
 import com.mesalista.cliente.ui.comun.Aviso
 import com.mesalista.cliente.ui.comun.BotonPrincipal
+import com.mesalista.cliente.ui.comun.BotonSecundario
 import com.mesalista.cliente.ui.comun.Pagina
 import com.mesalista.cliente.ui.comun.Seccion
 import com.mesalista.cliente.ui.comun.TarjetaReserva
@@ -79,7 +80,7 @@ class InicioVM : ViewModel() {
 }
 
 @Composable
-fun InicioPantalla(irAReserva: (Int) -> Unit, irAReservar: () -> Unit, vm: InicioVM = viewModel()) {
+fun InicioPantalla(irAReserva: (Int) -> Unit, irAReservar: () -> Unit, irAVincular: () -> Unit, vm: InicioVM = viewModel()) {
     val usuario by App.sesion.usuario.collectAsState()
     LaunchedEffect(Unit) { vm.cargar() }
     Pagina {
@@ -107,5 +108,6 @@ fun InicioPantalla(irAReserva: (Int) -> Unit, irAReservar: () -> Unit, vm: Inici
             )
             else -> vm.proximas.forEach { r -> TarjetaReserva(r) { irAReserva(r.id) } }
         }
+        BotonSecundario("Añadir una reserva hecha en el local", alPulsar = irAVincular)
     }
 }
