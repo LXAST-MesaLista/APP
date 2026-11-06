@@ -1,0 +1,16 @@
+# Compilación
+.gradle/
+.kotlin/
+build/
+# Android Studio
+.idea/
+*.iml
+captures/
+# Rutas de este ordenador y secretos de firma
+local.properties
+keystore.properties
+keystore/
+*.apk
+*.aab
+# Configuración de Firebase de cada proyecto (se descarga de la consola de Firebase)
+app/google-services.json
