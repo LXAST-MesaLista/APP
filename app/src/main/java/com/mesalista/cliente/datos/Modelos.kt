@@ -108,6 +108,36 @@ data class Reserva(
     }
 }
 
+/** Solicitud de mesa para un grupo grande (RF-43). */
+data class SolicitudGrupo(
+    val id: Int,
+    val fecha: LocalDate,
+    val hora: String,
+    val personas: Int,
+    val nota: String?,
+    val estado: String,
+    val respuesta: String?,
+    val reservaId: Int?,
+) {
+    companion object {
+        fun lista(j: JSONObject): List<SolicitudGrupo> {
+            val a = j.optJSONArray("requests") ?: return emptyList()
+            return (0 until a.length()).map { a.getJSONObject(it) }.map {
+                SolicitudGrupo(
+                    id = it.getInt("id"),
+                    fecha = LocalDate.parse(it.getString("date")),
+                    hora = it.getString("time"),
+                    personas = it.getInt("party"),
+                    nota = it.textoONull("note"),
+                    estado = it.getString("status"),
+                    respuesta = it.textoONull("reply"),
+                    reservaId = if (it.isNull("reservation_id")) null else it.getInt("reservation_id"),
+                )
+            }
+        }
+    }
+}
+
 /** Aviso del restaurante (RF-32), p. ej. una cancelación. */
 data class AvisoRestaurante(val id: Int, val mensaje: String, val reservaId: Int?) {
     companion object {

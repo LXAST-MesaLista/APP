@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,7 @@ fun Campo(
     alTerminar: () -> Unit = {},
     maximo: Int = 254,
     lineas: Int = 1,
+    mayusculas: Boolean = false,
 ) {
     OutlinedTextField(
         value = valor,
@@ -75,7 +77,13 @@ fun Campo(
         singleLine = lineas == 1,
         minLines = lineas,
         visualTransformation = if (clave) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(keyboardType = if (clave) KeyboardType.Password else teclado, imeAction = if (ultimo) ImeAction.Done else ImeAction.Next),
+        // Mayúsculas desde el teclado (no transformando el texto al escribir, que puede perder letras).
+        keyboardOptions = KeyboardOptions(
+            capitalization = if (mayusculas) KeyboardCapitalization.Characters else KeyboardCapitalization.None,
+            autoCorrectEnabled = !mayusculas && !clave,
+            keyboardType = if (clave) KeyboardType.Password else teclado,
+            imeAction = if (ultimo) ImeAction.Done else ImeAction.Next,
+        ),
         keyboardActions = KeyboardActions(onDone = { alTerminar() }),
         modifier = modifier.fillMaxWidth(),
     )

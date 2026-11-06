@@ -3,6 +3,7 @@ package com.mesalista.cliente.ui.reservas
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +88,7 @@ class ReservarVM : ViewModel() {
 }
 
 @Composable
-fun ReservarPantalla(irAConfirmar: (String, Int, String) -> Unit, vm: ReservarVM = viewModel()) {
+fun ReservarPantalla(irAConfirmar: (String, Int, String) -> Unit, irAGrupos: () -> Unit, vm: ReservarVM = viewModel()) {
     val cfg = vm.cfg
     Pagina {
         Titulo("Reservar mesa", "Elige el día, cuántos sois y la hora.")
@@ -100,10 +101,9 @@ fun ReservarPantalla(irAConfirmar: (String, Int, String) -> Unit, vm: ReservarVM
         SelectorDia(cfg, vm.fecha, vm::elegirDia)
         Seccion("¿Cuántos sois?")
         SelectorPersonas(vm.personas, cfg.minPersonas, cfg.maxPersonas, vm::elegirPersonas)
-        Text(
-            "¿Sois más de ${cfg.maxPersonas}? Envía una solicitud de grupo (hasta ${cfg.maxGrupo} personas).",
-            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        TextButton(onClick = irAGrupos) {
+            Text("¿Sois más de ${cfg.maxPersonas}? Solicitud de grupo (hasta ${cfg.maxGrupo} personas) ›")
+        }
         Seccion("Horas libres")
         when {
             vm.cargando -> CircularProgressIndicator()
