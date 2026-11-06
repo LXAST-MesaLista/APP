@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Avisos de las reservas (Android 13+ pide permiso al usuario). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Para abrir PayPal en una pestaña del navegador (Custom Tabs). -->
     <queries>
@@ -40,5 +42,24 @@
                 <data android:scheme="mesalista" android:host="reserva" />
             </intent-filter>
         </activity>
+
+        <!-- Avisos push (FCM): token nuevo y avisos que llegan con la app abierta. -->
+        <service
+            android:name=".AvisosServicio"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- Con la app cerrada, el sistema muestra el aviso: en el canal «Reservas», con este icono y color. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="reservas" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_aviso" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/bar" />
     </application>
 </manifest>

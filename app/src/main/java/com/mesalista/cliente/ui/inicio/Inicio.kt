@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mesalista.cliente.App
+import com.mesalista.cliente.datos.Avisos
 import com.mesalista.cliente.datos.ApiError
 import com.mesalista.cliente.datos.AvisoRestaurante
 import com.mesalista.cliente.datos.Reserva
@@ -83,6 +84,8 @@ class InicioVM : ViewModel() {
 fun InicioPantalla(irAReserva: (Int) -> Unit, irAReservar: () -> Unit, irAVincular: () -> Unit, vm: InicioVM = viewModel()) {
     val usuario by App.sesion.usuario.collectAsState()
     LaunchedEffect(Unit) { vm.cargar() }
+    // Ha llegado un aviso push con la pantalla abierta: se recargan los datos.
+    LaunchedEffect(Unit) { Avisos.cambios.collect { vm.cargar() } }
     Pagina {
         Titulo("Hola, ${usuario?.nombre?.substringBefore(' ').orEmpty()}")
         if (vm.avisos.isNotEmpty()) {

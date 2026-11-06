@@ -1,5 +1,10 @@
 package com.mesalista.cliente.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,6 +40,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.mesalista.cliente.App
+import com.mesalista.cliente.datos.Avisos
 import com.mesalista.cliente.datos.Enlaces
 import com.mesalista.cliente.ui.acceso.BienvenidaPantalla
 import com.mesalista.cliente.ui.acceso.EntrarPantalla
@@ -136,14 +144,31 @@ private fun PrincipalNav() {
     LaunchedEffect(Unit) {
         Mensajes.flujo.collect { avisos.showSnackbar(it) }
     }
-    // Enlaces que abren una reserva: vuelta de PayPal y (fase 4) avisos push tocados.
+    // Avisos push: se pide el permiso (Android 13+) una sola vez y se registra el móvil en el servidor.
+    val contexto = LocalContext.current
+    val pedirPermiso = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        if (Avisos.activo && Build.VERSION.SDK_INT >= 33 && !Avisos.permisoPedido(contexto) &&
+            ContextCompat.checkSelfPermission(contexto, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Avisos.marcarPermisoPedido(contexto)
+            pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        Avisos.registrar()
+    }
+    // Enlaces que abren una reserva: vuelta de PayPal y avisos push tocados.
     val destino by Enlaces.pendiente.collectAsState()
     LaunchedEffect(destino) {
         val d = destino ?: return@LaunchedEffect
         Enlaces.pendiente.value = null
         d.pago?.let { Mensajes.mostrar(Enlaces.textoPago(it)) }
-        if (d.reservaId != null) nav.navigate("reserva/${d.reservaId}") { launchSingleTop = true }
-        else if (d.pago != null) nav.irASeccion("reservas")
+        if (d.tipo != null) Avisos.cambios.tryEmit(Unit)   // los datos han cambiado: recargar
+        val abierta = nav.currentBackStackEntry?.takeIf { it.destination.route == "reserva/{id}" }?.arguments?.getInt("id")
+        when {
+            d.reservaId != null && d.reservaId == abierta -> Unit   // ya está en pantalla y se recarga
+            d.reservaId != null -> nav.navigate("reserva/${d.reservaId}")
+            d.pago != null || d.tipo != null -> nav.irASeccion("reservas")
+        }
     }
     val principal = Seccion.entries.any { it.ruta == ruta }
     Scaffold(

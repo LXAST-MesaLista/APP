@@ -47,6 +47,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.mesalista.cliente.App
+import com.mesalista.cliente.datos.Avisos
 import com.mesalista.cliente.datos.ApiError
 import com.mesalista.cliente.datos.Config
 import com.mesalista.cliente.datos.Datos
@@ -129,6 +130,8 @@ class DetalleVM(estado: SavedStateHandle) : ViewModel() {
 @Composable
 fun DetallePantalla(irAModificar: (Int) -> Unit, vm: DetalleVM = viewModel()) {
     LaunchedEffect(Unit) { vm.cargar() }
+    // Ha llegado un aviso push con la pantalla abierta: se recargan los datos.
+    LaunchedEffect(Unit) { Avisos.cambios.collect { vm.cargar() } }
     val r = vm.reserva
     var confirmarCancelar by remember { mutableStateOf(false) }
     Pagina {
