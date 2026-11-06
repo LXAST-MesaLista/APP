@@ -2,7 +2,7 @@
 
 App de MesaLista para **clientes**, nativa de Android, hecha con **Kotlin y
 Jetpack Compose** (Material 3). No guarda reservas: todo se lo pide al servidor
-de MesaLista ([MesaLista-Servidor](https://github.com/jiahao0408/MesaLista-Servidor))
+de MesaLista ([MesaLista-Servidor](https://github.com/LXPT-UIB/MesaLista-Servidor))
 por su API `/api/v1`. **Firebase** se usa solo para los **avisos push** (FCM).
 
 ```
