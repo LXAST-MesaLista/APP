@@ -52,6 +52,7 @@ de Firebase (proyecto `mesalista-57287`).
 | `app/src/main/java/com/mesalista/cliente/ui/tema/Tema.kt` | Colores de la app (aquí se cambia el diseño) |
 | `app/src/main/res/` | Icono, textos y seguridad de red (`xml/network_security_config.xml`) |
 | `docs/pantallas.md` | Qué archivo cambiar para cada pantalla (aspecto, textos, pantallas nuevas) |
+| `docs/manual-estilo.md` | Manual: cambiar colores, letra, formas, distribución, textos e icono |
 | `app/src/debug/` | Solo en desarrollo: permite HTTP hacia `10.0.2.2` (la API de este ordenador) |
 
 ## Compilar
