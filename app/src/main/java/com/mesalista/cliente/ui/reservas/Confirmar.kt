@@ -74,7 +74,7 @@ class ConfirmarVM(estado: SavedStateHandle) : ViewModel() {
                 val r = App.api.post("/reservations", cuerpo)
                 Mensajes.mostrar(
                     if (r.optBoolean("replayed")) "Tu reserva ya estaba registrada."
-                    else "¡Reserva confirmada! Te hemos enviado un correo con los detalles."
+                    else "¡Reserva confirmada! Tienes el QR en «Mis reservas»."
                 )
                 alConfirmar(r.getJSONObject("reservation").getInt("id"))
             } catch (e: ApiError) {
@@ -108,7 +108,7 @@ fun ConfirmarPantalla(alConfirmar: (Int) -> Unit, alVolverAHoras: () -> Unit, vm
         FormularioExtras(cfg, vm.extras, vm.errorNota)
         BotonPrincipal("Confirmar reserva", vm.enviando) { vm.confirmar(alConfirmar, alVolverAHoras) }
         Text(
-            "Te enviaremos un correo con la reserva. Puedes cambiarla o cancelarla desde «Mis reservas» hasta unas horas antes. " +
+            "Te avisaremos en la app de cualquier cambio. Puedes cambiarla o cancelarla desde «Mis reservas» hasta unas horas antes. " +
                 "Si no vienes y no cancelas, la reserva queda como «no presentada».",
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

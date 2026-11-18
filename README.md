@@ -22,9 +22,9 @@ App (Kotlin) ──HTTPS, token Bearer──> Servidor /api/v1 ──aviso──
 - No hay copias de seguridad en la nube de los datos de la app.
 - La versión que se instala en los móviles (`release`) solo habla por **HTTPS** con certificados del sistema.
 
-## Descargar e instalar (versión 1.0)
+## Descargar e instalar (versión 1.1)
 
-[`release/MesaLista-1.0.apk`](release/MesaLista-1.0.apk) es la versión de
+[`release/MesaLista-1.1.apk`](release/MesaLista-1.1.apk) es la versión de
 producción, firmada con la clave de MesaLista. Llama a
 `https://mesalista.spaincentral.cloudapp.azure.com/api/v1` y trae los avisos push
 de Firebase (proyecto `mesalista-57287`).
@@ -36,9 +36,14 @@ de Firebase (proyecto `mesalista-57287`).
 
 | Dato | Valor |
 |---|---|
-| Paquete | `com.mesalista.cliente` · versión 1.0 (versionCode 1) |
-| SHA-256 del APK | `dbda702a4a976e00d9e28e872f31767e3462fb90de7c9629ff4a3c3665d9626e` |
+| Paquete | `com.mesalista.cliente` · versión 1.1 (versionCode 2) |
+| SHA-256 del APK | `86891376bc1904de2f45069685a6ada62b2d64681eebcbb829f8dfdc3abff4df` |
 | SHA-256 del certificado de firma | `4c533e022a7c4965e1ec45f46012c6e0c0b8110bc0eedeb249a4f27ba856c442` |
+
+Cambios de la 1.1: «Mis reservas» separa las solicitudes de grupo que esperan
+al local o el pago, las no aceptadas y las anteriores; los textos ya no dicen
+que se envía un correo (los avisos llegan por la app). La 1.0 sigue en
+[`release/MesaLista-1.0.apk`](release/MesaLista-1.0.apk).
 
 ## Carpetas
 

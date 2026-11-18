@@ -82,29 +82,79 @@ fun MisReservasPantalla(irAReserva: (Int) -> Unit, irAGrupos: () -> Unit, irAVin
             if (vm.error == null) CircularProgressIndicator()
             return@Pagina
         }
-        val proximas = lista.filter { it.pendiente }
-        val anteriores = lista.filterNot { it.pendiente }
+        val reparto = Reparto(lista, vm.solicitudes)
         Seccion("Próximas")
-        if (proximas.isEmpty()) {
+        if (reparto.proximas.isEmpty()) {
             Text("No tienes reservas pendientes.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        proximas.forEach { r -> TarjetaReserva(r) { irAReserva(r.id) } }
+        reparto.proximas.forEach { r -> TarjetaReserva(r) { irAReserva(r.id) } }
 
         Seccion("Solicitudes de grupo")
-        if (vm.solicitudes.isEmpty()) {
-            Text("No tienes solicitudes de grupo.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (reparto.esperando.isEmpty()) {
+            Text("No tienes solicitudes de grupo pendientes.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        vm.solicitudes.forEach { g -> TarjetaSolicitud(g, irAReserva, vm::cancelarSolicitud) }
+        reparto.esperando.forEach { g ->
+            TarjetaSolicitud(g, irAReserva, vm::cancelarSolicitud, pendientePago = g.estado == "accepted")
+        }
+
+        if (reparto.noAceptadas.isNotEmpty()) {
+            Seccion("No aceptadas")
+            reparto.noAceptadas.forEach { g -> TarjetaSolicitud(g, irAReserva, vm::cancelarSolicitud) }
+        }
 
         FilaBotones {
             BotonSecundario("Pedir para un grupo", Modifier.weight(1f), alPulsar = irAGrupos)
             BotonSecundario("Reserva del local", Modifier.weight(1f), alPulsar = irAVincular)
         }
 
-        if (anteriores.isNotEmpty()) {
+        if (reparto.anteriores.isNotEmpty()) {
             Seccion("Anteriores")
-            anteriores.forEach { r -> TarjetaReserva(r) { irAReserva(r.id) } }
+            reparto.anteriores.forEach { x ->
+                when (x) {
+                    is Reserva -> TarjetaReserva(x) { irAReserva(x.id) }
+                    is SolicitudGrupo -> TarjetaSolicitud(x, irAReserva, vm::cancelarSolicitud)
+                }
+            }
         }
     }
+}
+
+/**
+ * Reparte las reservas y las solicitudes de grupo entre las secciones, sin
+ * que nada salga dos veces (igual que la web, src/paginas/cliente/reservas.js):
+ *  - Solicitudes de grupo: las que esperan respuesta del local y las aceptadas
+ *    que falta pagar (su reserva no sale también en «Próximas»).
+ *  - No aceptadas: las que el local ha rechazado, con su motivo.
+ *  - Próximas: las demás reservas pendientes.
+ *  - Anteriores: las reservas terminadas y las solicitudes caducadas o
+ *    canceladas antes de aceptarse. De una caducada solo sale la solicitud, no
+ *    la reserva que se liberó. Las aceptadas ya confirmadas, o canceladas
+ *    después, se ven por su reserva.
+ */
+private class Reparto(reservas: List<Reserva>, solicitudes: List<SolicitudGrupo>) {
+    private val porId = reservas.associateBy { it.id }
+    private fun reservaDe(g: SolicitudGrupo) = g.reservaId?.let { porId[it] }
+
+    val esperando = solicitudes.filter { g ->
+        g.estado == "pending" || (g.estado == "accepted" && reservaDe(g)?.estado == "pending_payment")
+    }
+    private val enSolicitudes = esperando.mapNotNull { it.reservaId }.toSet()
+
+    val noAceptadas = solicitudes.filter { it.estado == "rejected" }.sortedByDescending { "${it.fecha} ${it.hora}" }
+
+    private val terminadas = solicitudes.filter { g -> g.estado == "expired" || (g.estado == "cancelled" && g.reservaId == null) }
+    private val tapadas = terminadas.mapNotNull { it.reservaId }.toSet()
+
+    val proximas = reservas.filter { it.pendiente && it.id !in enSolicitudes }
+
+    /** Reservas (Reserva) y solicitudes (SolicitudGrupo) terminadas, de la más reciente a la más antigua. */
+    val anteriores: List<Any> = (reservas.filter { !it.pendiente && it.id !in tapadas } + terminadas)
+        .sortedByDescending { x ->
+            when (x) {
+                is Reserva -> "${x.fecha} ${x.hora}"
+                is SolicitudGrupo -> "${x.fecha} ${x.hora}"
+                else -> ""
+            }
+        }
 }
 

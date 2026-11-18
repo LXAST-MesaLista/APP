@@ -38,7 +38,7 @@ object Enlaces {
 
     /** Texto del resultado de un pago para mostrarlo al volver de PayPal. */
     fun textoPago(resultado: String) = when (resultado) {
-        "ok" -> "Señal pagada: tu reserva de grupo está confirmada. Te hemos enviado un correo."
+        "ok" -> "Señal pagada: tu reserva de grupo está confirmada."
         "cancelado" -> "Has cancelado el pago. Aún puedes pagar antes de que termine el plazo."
         "caducado" -> "El plazo para pagar había terminado: no se te ha cobrado nada."
         else -> "No se ha podido completar el pago. No se te ha cobrado nada; inténtalo de nuevo."

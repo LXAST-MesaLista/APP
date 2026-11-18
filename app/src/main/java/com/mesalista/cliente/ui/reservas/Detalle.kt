@@ -117,7 +117,7 @@ class DetalleVM(estado: SavedStateHandle) : ViewModel() {
             cancelando = true
             try {
                 reserva = Reserva.de(App.api.post("/reservations/$id/cancel").getJSONObject("reservation"))
-                Mensajes.mostrar("Reserva cancelada. Te hemos enviado un correo.")
+                Mensajes.mostrar("Reserva cancelada.")
             } catch (e: ApiError) {
                 error = e.texto
             } finally {

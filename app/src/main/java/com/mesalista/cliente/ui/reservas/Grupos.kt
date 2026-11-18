@@ -120,7 +120,7 @@ class GrupoVM : ViewModel() {
                     JSONObject().put("date", fecha.toString()).put("time", h).put("party", personas)
                         .put("note", nota.trim().ifEmpty { JSONObject.NULL }).put("consent", consentimiento),
                 )
-                Mensajes.mostrar("Solicitud enviada. El restaurante te responderá por correo y en la app.")
+                Mensajes.mostrar("Solicitud enviada. El restaurante te responderá en la app.")
                 alEnviar()
             } catch (e: ApiError) {
                 error = e.texto
@@ -186,16 +186,27 @@ fun GrupoPantalla(alEnviar: () -> Unit, vm: GrupoVM = viewModel()) {
     }
 }
 
-/** Una solicitud de grupo en «Mis reservas», con «Cancelar» si aún no tiene respuesta. */
+/**
+ * Una solicitud de grupo en «Mis reservas», con «Cancelar» si aún no tiene
+ * respuesta. pendientePago: aceptada y con la señal por pagar (su reserva no
+ * sale en «Próximas», así que aquí va el botón para pagarla).
+ */
 @Composable
-fun TarjetaSolicitud(g: SolicitudGrupo, irAReserva: (Int) -> Unit, alCancelar: (Int) -> Unit) {
+fun TarjetaSolicitud(g: SolicitudGrupo, irAReserva: (Int) -> Unit, alCancelar: (Int) -> Unit, pendientePago: Boolean = false) {
     var preguntar by remember { mutableStateOf(false) }
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("${Formato.fechaCorta(g.fecha)} · ${g.hora} · ${Formato.personas(g.personas)}", style = MaterialTheme.typography.titleSmall)
-            EstadoChip(g.estado, Formato.estadoSolicitud(g.estado))
+            if (pendientePago) {
+                EstadoChip("pending_payment")
+                Text("El restaurante ha aceptado tu grupo: paga la señal para confirmar la reserva.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                EstadoChip(g.estado, Formato.estadoSolicitud(g.estado))
+            }
             g.respuesta?.let { Text("Restaurante: «$it»", style = MaterialTheme.typography.bodyMedium) }
-            if (g.estado == "accepted" && g.reservaId != null) {
+            if (pendientePago && g.reservaId != null) {
+                BotonPrincipal("Pagar la señal", cargando = false) { irAReserva(g.reservaId) }
+            } else if (g.estado == "accepted" && g.reservaId != null) {
                 TextButton(onClick = { irAReserva(g.reservaId) }) { Text("Ver la reserva ›") }
             }
             if (g.estado == "pending") {
