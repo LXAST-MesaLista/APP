@@ -2,7 +2,7 @@
 
 App de MesaLista para **clientes**, nativa de Android, hecha con **Kotlin y
 Jetpack Compose** (Material 3). No guarda reservas: todo se lo pide al servidor
-de MesaLista ([MesaLista-Servidor](https://github.com/LXPT-UIB/MesaLista-Servidor))
+de MesaLista ([LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor), Node.js detrás de nginx)
 por su API `/api/v1`. **Firebase** se usa solo para los **avisos push** (FCM).
 
 ```
@@ -24,6 +24,7 @@ App (Kotlin) ──HTTPS, token Bearer──> Servidor /api/v1 ──aviso──
 | `app/src/main/java/com/mesalista/cliente/ui/` | Pantallas de Compose: `acceso/`, `inicio/`… y `Navegacion.kt` |
 | `app/src/main/java/com/mesalista/cliente/ui/tema/Tema.kt` | Colores de la app (aquí se cambia el diseño) |
 | `app/src/main/res/` | Icono, textos y seguridad de red (`xml/network_security_config.xml`) |
+| `docs/pantallas.md` | Qué archivo cambiar para cada pantalla (aspecto, textos, pantallas nuevas) |
 | `app/src/debug/` | Solo en desarrollo: permite HTTP hacia `10.0.2.2` (la API de este ordenador) |
 
 ## Compilar
@@ -70,12 +71,20 @@ para instalarse encima de la anterior.
 ### Desarrollo con el emulador
 
 La versión `debug` llama a `http://10.0.2.2:8091/api/v1`: desde el emulador de
-Android, `10.0.2.2` es el propio ordenador. Basta con tener arrancada la API de
-desarrollo del servidor:
+Android, `10.0.2.2` es el propio ordenador. Basta con tener arrancada la API
+del servidor ([LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor),
+Node.js 20 o posterior y PostgreSQL) en este ordenador:
 
 ```bash
-php -d extension=pdo_pgsql -S 127.0.0.1:8091 -t publico pruebas/dev-router.php
+npm install
+cp config/config.example.json config/config.json
+node src/server.js        # escucha en http://127.0.0.1:8091
 ```
+
+En ese `config.json` de desarrollo hay que poner los datos de PostgreSQL, un
+`qr_secret` y `"require_https": false`: desde el emulador la API llega por HTTP,
+y con `true` la rechazaría. En el servidor de Azure se queda en `true` (nginx
+pone el HTTPS).
 
 ## Firebase (avisos push)
 
@@ -85,7 +94,8 @@ php -d extension=pdo_pgsql -S 127.0.0.1:8091 -t publico pruebas/dev-router.php
    (no se sube a Git). Sin ese archivo la app compila y funciona, pero sin avisos.
 3. La **clave de la cuenta de servicio** (Configuración del proyecto → Cuentas de
    servicio → Generar nueva clave privada) es **secreta**: no va en la app. Se
-   instala en el servidor con `configure_fcm.php`.
+   instala en el servidor con `sudo mesalista push <archivo.json>`, y
+   `sudo mesalista estado` comprueba que Google la acepta.
 
 Cómo funcionan en la app (`datos/Avisos.kt` y `AvisosServicio.kt`):
 
