@@ -11,6 +11,8 @@ local.properties
 keystore.properties
 keystore/
 *.apk
+# Excepto las versiones publicadas para instalar en los móviles
+!release/*.apk
 *.aab
 # Configuración de Firebase de cada proyecto (se descarga de la consola de Firebase)
 app/google-services.json

@@ -3,7 +3,16 @@
 App de MesaLista para **clientes**, nativa de Android, hecha con **Kotlin y
 Jetpack Compose** (Material 3). No guarda reservas: todo se lo pide al servidor
 de MesaLista ([LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor), Node.js detrás de nginx)
-por su API `/api/v1`. **Firebase** se usa solo para los **avisos push** (FCM).
+por su API `/api/v1`, la misma que usa la web ([LXPT-UIB/WEB](https://github.com/LXPT-UIB/WEB)).
+**Firebase** se usa solo para los **avisos push** (FCM).
+
+Las tres partes de MesaLista, cada una en su repositorio:
+
+| Parte | Repositorio |
+|---|---|
+| Servidor: API REST (Node.js + PostgreSQL) y nginx | [LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor) |
+| Web de clientes y panel del restaurante (Node.js) | [LXPT-UIB/WEB](https://github.com/LXPT-UIB/WEB) |
+| App para Android de los clientes (Kotlin, Firebase) | [LXPT-UIB/APP](https://github.com/LXPT-UIB/APP) |
 
 ```
 App (Kotlin) ──HTTPS, token Bearer──> Servidor /api/v1 ──aviso──> Firebase (FCM) ──> móvil
@@ -12,6 +21,24 @@ App (Kotlin) ──HTTPS, token Bearer──> Servidor /api/v1 ──aviso──
 - El token de la sesión se guarda **cifrado** (AES-GCM con una clave del Android Keystore).
 - No hay copias de seguridad en la nube de los datos de la app.
 - La versión que se instala en los móviles (`release`) solo habla por **HTTPS** con certificados del sistema.
+
+## Descargar e instalar (versión 1.0)
+
+[`release/MesaLista-1.0.apk`](release/MesaLista-1.0.apk) es la versión de
+producción, firmada con la clave de MesaLista. Llama a
+`https://mesalista.spaincentral.cloudapp.azure.com/api/v1` y trae los avisos push
+de Firebase (proyecto `mesalista-57287`).
+
+1. Descarga el APK en el móvil (Android 8.0 o posterior).
+2. Ábrelo y permite «Instalar apps desconocidas» para el navegador o el gestor de archivos.
+3. Las versiones siguientes se instalan encima si van firmadas con la misma clave
+   (`keystore.properties`, no se sube a Git).
+
+| Dato | Valor |
+|---|---|
+| Paquete | `com.mesalista.cliente` · versión 1.0 (versionCode 1) |
+| SHA-256 del APK | `dbda702a4a976e00d9e28e872f31767e3462fb90de7c9629ff4a3c3665d9626e` |
+| SHA-256 del certificado de firma | `4c533e022a7c4965e1ec45f46012c6e0c0b8110bc0eedeb249a4f27ba856c442` |
 
 ## Carpetas
 
