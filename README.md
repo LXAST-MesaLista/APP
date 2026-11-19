@@ -58,6 +58,7 @@ que se envía un correo (los avisos llegan por la app). La 1.0 sigue en
 | `app/src/main/res/` | Icono, textos y seguridad de red (`xml/network_security_config.xml`) |
 | `docs/pantallas.md` | Qué archivo cambiar para cada pantalla (aspecto, textos, pantallas nuevas) |
 | `docs/manual-estilo.md` | Manual: cambiar colores, letra, formas, distribución, textos e icono |
+| `docs/integracion-tecnologias.md` | Todas las tecnologías de MesaLista y cómo se integran, con diagramas (copia del repositorio Servidor) |
 | `docs/manual-desarrollo.md` | Manual completo: estructura, conexión con la API, todas las rutas, datos, Firebase y publicación |
 | `app/src/debug/` | Solo en desarrollo: permite HTTP hacia `10.0.2.2` (la API de este ordenador) |
 
