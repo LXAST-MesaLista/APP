@@ -2,17 +2,17 @@
 
 App de MesaLista para **clientes**, nativa de Android, hecha con **Kotlin y
 Jetpack Compose** (Material 3). No guarda reservas: todo se lo pide al servidor
-de MesaLista ([LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor), Node.js detrás de nginx)
-por su API `/api/v1`, la misma que usa la web ([LXPT-UIB/WEB](https://github.com/LXPT-UIB/WEB)).
+de MesaLista ([LXAST-MesaLista/Servidor](https://github.com/LXAST-MesaLista/Servidor), Node.js detrás de nginx)
+por su API `/api/v1`, la misma que usa la web ([LXAST-MesaLista/WEB](https://github.com/LXAST-MesaLista/WEB)).
 **Firebase** se usa solo para los **avisos push** (FCM).
 
 Las tres partes de MesaLista, cada una en su repositorio:
 
 | Parte | Repositorio |
 |---|---|
-| Servidor: API REST (Node.js + PostgreSQL) y nginx | [LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor) |
-| Web de clientes y panel del restaurante (Node.js) | [LXPT-UIB/WEB](https://github.com/LXPT-UIB/WEB) |
-| App para Android de los clientes (Kotlin, Firebase) | [LXPT-UIB/APP](https://github.com/LXPT-UIB/APP) |
+| Servidor: API REST (Node.js + PostgreSQL) y nginx | [LXAST-MesaLista/Servidor](https://github.com/LXAST-MesaLista/Servidor) |
+| Web de clientes y panel del restaurante (Node.js) | [LXAST-MesaLista/WEB](https://github.com/LXAST-MesaLista/WEB) |
+| App para Android de los clientes (Kotlin, Firebase) | [LXAST-MesaLista/APP](https://github.com/LXAST-MesaLista/APP) |
 
 ```
 App (Kotlin) ──HTTPS, token Bearer──> Servidor /api/v1 ──aviso──> Firebase (FCM) ──> móvil
@@ -107,7 +107,7 @@ para instalarse encima de la anterior.
 
 La versión `debug` llama a `http://10.0.2.2:8091/api/v1`: desde el emulador de
 Android, `10.0.2.2` es el propio ordenador. Basta con tener arrancada la API
-del servidor ([LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor),
+del servidor ([LXAST-MesaLista/Servidor](https://github.com/LXAST-MesaLista/Servidor),
 Node.js 20 o posterior y PostgreSQL) en este ordenador:
 
 ```bash
