@@ -13,7 +13,7 @@ Documentos relacionados:
 - [pantallas.md](pantallas.md): qué archivo dibuja cada pantalla.
 - [manual-estilo.md](manual-estilo.md): colores, letra, textos e icono.
 - Contrato completo de la API: `docs/openapi.yaml` y `docs/integracion.md` del
-  repositorio [LXPT-UIB/Servidor](https://github.com/LXPT-UIB/Servidor).
+  repositorio [LXAST-MesaLista/Servidor](https://github.com/LXAST-MesaLista/Servidor).
 
 ---
 
@@ -34,9 +34,9 @@ Documentos relacionados:
 
 | Pieza | Qué hace | Dónde está |
 |---|---|---|
-| **App** | Muestra pantallas, recoge lo que hace el usuario y llama a la API | Este repositorio (LXPT-UIB/APP) |
+| **App** | Muestra pantallas, recoge lo que hace el usuario y llama a la API | Este repositorio (LXAST-MesaLista/APP) |
 | **nginx** | Recibe todo por HTTPS en el dominio y pasa `/api/v1` a la API | Máquina de Azure |
-| **API** | Todas las reglas: horas libres, mesas, plazos, QR, pagos, cuentas | LXPT-UIB/Servidor |
+| **API** | Todas las reglas: horas libres, mesas, plazos, QR, pagos, cuentas | LXAST-MesaLista/Servidor |
 | **PostgreSQL** | Base de datos. La app **nunca** se conecta a ella | Máquina de Azure, solo en local |
 | **Firebase (FCM)** | Hace llegar avisos push al móvil | Consola de Firebase, proyecto `mesalista-57287` |
 | **PayPal** | Cobra la señal de las reservas de grupo | developer.paypal.com (sandbox) |
